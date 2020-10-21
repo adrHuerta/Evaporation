@@ -30,10 +30,10 @@ University of Florida (2010).
 - http://www.fao.org/3/x0490e/x0490e08.htm
 """
 
-def penman_monteith_FAO56_monthly(time_i, tmax_i, tmin_i, rs_i, lat_i, z_i, u2_i, tmax_i_minus1, tmean_i_minus1):
+def penman_monteith_FAO56_monthly(time_i, tmax_i, tmin_i, rs_i, lat_i, z_i, u2_i, tmax_i_minus1, tmin_i_minus1):
     # step 1
     tmean_i = (tmax_i + tmin_i)/2
-    tmean_i_minus1 = (tmax_i_minus1 + tmean_i_minus1)/2
+    tmean_i_minus1 = (tmax_i_minus1 + tmin_i_minus1)/2
     # step 2
     rs_i = rs_i
     # step 3
