@@ -6,12 +6,12 @@ exec(open("./src/hargreaves_samani.py").read())
 exec(open("./src/penman_monteith_FAO56.py").read())
 
 # main variables for 1981-01-01
-Z = xr.open_dataset("./data/Z.nc").Z
-U2 = xr.open_dataset("./data/U2.nc").U2
-LAT = xr.open_dataset("./data/LAT.nc").LAT
-Tmin = xr.open_dataset("./data/Tmin.nc").Tmin
-Tmax = xr.open_dataset("./data/Tmax.nc").Tmax
-Rs = xr.open_dataset("./data/Rs.nc").Rs
+Z = xr.open_dataset("data/example_00/Z.nc").Z
+U2 = xr.open_dataset("data/example_00/U2.nc").U2
+LAT = xr.open_dataset("data/example_00/LAT.nc").LAT
+Tmin = xr.open_dataset("data/example_00/Tmin.nc").Tmin
+Tmax = xr.open_dataset("data/example_00/Tmax.nc").Tmax
+Rs = xr.open_dataset("data/example_00/Rs.nc").Rs
 
 # hs
 hs_evap = hargreaves_samani(time_i=1,
