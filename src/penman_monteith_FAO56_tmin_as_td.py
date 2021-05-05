@@ -6,11 +6,14 @@ Parameters:
 time_i : number of the day (julian day) since 1 january
 tmax_i : daily maximum temperature (°C)
 tmin_i : daily minimum temperature (°C)
-rs_i : daily solar radiation  (MJ/m(-2).day)
-td_i : daily dew point temperature (°C)
+rs_i : daily/monthly solar radiation  (MJ/m(-2).day)
 lat_i : latitude in decimal degree (°)
 z_i : elevation above sea level (m)
 u2_i : wind speed (m/s)
+
+Comments:
+Some simplifications are done:
+i) actual vapor pressure is only computed from tmin_i
 
 References:
 - Zotarelli, Lincoln, et al. "Step by step calculation of the Penman-Monteith
@@ -18,7 +21,7 @@ Evapotranspiration (FAO-56 Method)." Institute of Food and Agricultural Sciences
 University of Florida (2010).
 """
 
-def penman_monteith_FAO56(time_i, tmax_i, tmin_i, rs_i, td_i, lat_i, z_i, u2_i):
+def penman_monteith_FAO56_tmin_as_td(time_i, tmax_i, tmin_i, rs_i, lat_i, z_i, u2_i):
     # step 1
     tmean_i = (tmax_i + tmin_i)/2
     # step 2
@@ -42,7 +45,7 @@ def penman_monteith_FAO56(time_i, tmax_i, tmin_i, rs_i, td_i, lat_i, z_i, u2_i):
     e_tmin_i = 0.6108 * np.exp((17.27 * tmin_i) / (tmin_i + 237.3))
     es_i = (e_tmax_i + e_tmin_i) / 2
     # step 11
-    ea_i = 0.6108 * np.exp((17.27 * td_i) / (td_i + 237.3)) ## actual vapor pressure based on dew temperature
+    ea_i = e_tmin_i
     # step 12
     dr_i = 1 + 0.033 * np.cos(2 * np.pi * time_i / 365)
     delta_SD_i = 0.409 * np.sin((2 * np.pi * time_i / 365) - 1.39)
@@ -68,4 +71,4 @@ def penman_monteith_FAO56(time_i, tmax_i, tmin_i, rs_i, td_i, lat_i, z_i, u2_i):
     # step 22
     response = ET_rad_i + ET_wind_i
 
-    return np.round(response, 2)
+    return np.round(response, 1)

@@ -17,9 +17,8 @@ tmin_i_minus1 : ten-day/monthly minimum temperature of the previous month (°C)
 
 Comments:
 Some simplifications are done:
-i) wind speed is automatically 2 m/s
-ii) actual vapor pressure is only computed from tmin_i
-iii) as at ten-day/monthly time step the soil heat flux (G) can
+i) actual vapor pressure is only computed from tmin_i
+ii) as at ten-day/monthly time step the soil heat flux (G) can
 no be simplified, G is computed from the mean monthly air temperatures of
 the previous and next month (Tmean_i - Tmean_i_minus1)
 
