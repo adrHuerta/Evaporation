@@ -1,6 +1,6 @@
 """
-Penman Monteith FAO56 equation for estimation of
-reference evapotranspiration (mm/day) based on Zotarelli et al. (2010)
+Penman Monteith FAO56 equation for estimation of reference evapotranspiration (mm/day)
+Used equation for the development of PISCOeo_pm (https://github.com/adrHuerta/PISCOeo_pm)
 
 Parameters:
 time_i : number of the day (julian day) since 1 january
@@ -8,17 +8,18 @@ tmax_i : daily maximum temperature (°C)
 tmin_i : daily minimum temperature (°C)
 sd_i : daily sunshine duration (hours) ~ solar radiation (MJ/m(-2).day)
 td_i : daily dew temperature (°C) ~ actual vapor pressure
+u2_i : wind speed (m/s)
 lat_i : latitude in decimal degree (°)
 z_i : elevation above sea level (m)
-u2_i : wind speed (m/s)
 
 References:
 - Zotarelli, Lincoln, et al. "Step by step calculation of the Penman-Monteith
 Evapotranspiration (FAO-56 Method)." Institute of Food and Agricultural Sciences.
 University of Florida (2010).
+- http://www.fao.org/3/x0490s/x0490s.pdf
 """
 
-def penman_monteith_FAO56_FT(time_i, tmax_i, tmin_i, sd_i, td_i, lat_i, z_i, u2_i):
+def penman_monteith_FAO56_FT(time_i, tmax_i, tmin_i, sd_i, td_i, u2_i, lat_i, z_i):
     # step 1
     tmean_i = (tmax_i + tmin_i)/2
     # step 2
@@ -41,19 +42,23 @@ def penman_monteith_FAO56_FT(time_i, tmax_i, tmin_i, sd_i, td_i, lat_i, z_i, u2_
     e_tmax_i = 0.6108 * np.exp((17.27 * tmax_i) / (tmax_i + 237.3))
     e_tmin_i = 0.6108 * np.exp((17.27 * tmin_i) / (tmin_i + 237.3))
     es_i = (e_tmax_i + e_tmin_i) / 2
-    # step 11
-    ea_i = 0.6108 * np.exp((17.27 * td_i) / (td_i + 237.3)) ## actual vapor pressure based on dew temperature
+    # step 11  # actual vapor pressure based on dew temperature, but ensuring that rh is no more than 100%
+    ea_i = 0.6108 * np.exp((17.27 * td_i) / (td_i + 237.3))  # (equation 14 - page 37 http://www.fao.org/3/x0490s/x0490s.pdf)
+    rh_mean_i = (ea_i / es_i) * 100 # step 11b
+    rh_mean_i[rh_mean_i > 100] = 100 # no more than 100%
+    ea_i = (rh_mean_i * es_i) / 100 # step 11b again
     # step 12
     dr_i = 1 + 0.033 * np.cos(2 * np.pi * time_i / 365)
     delta_SD_i = 0.409 * np.sin((2 * np.pi * time_i / 365) - 1.39)
     # step 13
     lat_rad_i = np.pi * lat_i / 180
     # step 14
-    Ws_i = np.arccos(-np.tan(lat_rad_i)*np.tan(delta_SD_i))
+    Ws_i = np.arccos(-np.tan(lat_rad_i) * np.tan(delta_SD_i))
     # step 15
     Ra_i = (24 * 60 / np.pi) * 0.0820 * dr_i * ((Ws_i * np.sin(lat_rad_i) * np.sin(delta_SD_i)) + (np.cos(lat_rad_i) * np.cos(delta_SD_i) * np.sin(Ws_i)))
     # step 2
-    rs_i = (0.25 + 0.5 * sd_i/12) * Ra_i ## sunshine duration to solar radiation based on Angstrom equation
+    N_sd_max_i = (24 / np.pi) * Ws_i # Maximum sunshine duration  (equation 34 - page 50 http://www.fao.org/3/x0490s/x0490s.pdf)
+    rs_i = (0.25 + 0.5 * sd_i/N_sd_max_i) * Ra_i ## sunshine duration to solar radiation based on Angstrom equation (equation 35 - page 50 http://www.fao.org/3/x0490s/x0490s.pdf)
     # step 16
     Rso_i = (0.75 + 2 * np.float_power(10, -5) * z_i) * Ra_i
     # step 17
